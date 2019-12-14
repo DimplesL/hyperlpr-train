@@ -30,7 +30,7 @@ for img_file in img_files:
 
     img_label = img_file.split('.')[0].split('_')[-1]
 
-    fi.write(img_label)
+    fi.write('{}:{}'.format(img_file, img_label))
     fi.write('\n')
 
 fi.close()
