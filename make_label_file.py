@@ -10,7 +10,7 @@ fi = codecs.open(train_label, 'w', encoding='utf-8')
 img_files = os.listdir(train_dir)
 
 for img_file in img_files:
-    if not img_file.endswith('.*g'):
+    if not img_file.endswith('g'):
         continue
 
     img_label = img_file.split('.')[0].split('_')[-1]
@@ -25,7 +25,7 @@ fi = codecs.open(val_label, 'w', encoding='utf-8')
 img_files = os.listdir(val_dir)
 
 for img_file in img_files:
-    if not img_file.endswith('.*g'):
+    if not img_file.endswith('g'):
         continue
 
     img_label = img_file.split('.')[0].split('_')[-1]
