@@ -34,8 +34,8 @@ def ctc_lambda_func(args):
     return K.ctc_batch_cost(labels, y_pred, input_length, label_length)
 
 
-def build_model(width, num_channels):
-    input_tensor = Input(name='the_input', shape=(width, 40, num_channels), dtype='float32')
+def build_model(width, height, num_channels):
+    input_tensor = Input(name='the_input', shape=(width, height, num_channels), dtype='float32')
     x = input_tensor
     base_conv = 32
 
@@ -67,8 +67,11 @@ def encode_label(s):
 def parse_line(line):
     parts = line.split(':')
     filename = parts[0]
-    label = encode_label(parts[1].strip().upper())
-    return filename, label
+    try:
+        label = encode_label(parts[1].strip().upper())
+        return filename, label
+    except Exception as e:
+        return None, None
 
 
 class TextImageGenerator:
@@ -94,6 +97,10 @@ class TextImageGenerator:
         with open(self._label_file) as f:
             for line in f:
                 filename, label = parse_line(line)
+                if len(label) != self._label_len:
+                    continue
+                if filename is None:
+                    continue
                 self.filenames.append(filename)
                 self.labels.append(label)
                 self._num_examples += 1
@@ -122,6 +129,9 @@ class TextImageGenerator:
         for j, i in enumerate(range(start, end)):
             fname = self._filenames[i]
             img = cv2.imread(os.path.join(self._img_dir, fname))
+            h, w = img.shape[:2]
+            if h != self._img_h:
+                continue
             images[j, ...] = img
         images = np.transpose(images, axes=[0, 2, 1, 3])
         labels = self._labels[start:end, ...]
@@ -153,7 +163,7 @@ def train(args):
         os.makedirs(args.log)
     label_len = args.label_len
 
-    input_tensor, y_pred = build_model(args.img_size[0], args.num_channels)
+    input_tensor, y_pred = build_model(args.img_size[0], args.img_size[1], args.num_channels)
 
     labels = Input(name='the_labels', shape=[label_len], dtype='float32')
     input_length = Input(name='input_length', shape=[1], dtype='int32')
@@ -210,40 +220,43 @@ def train(args):
 def export(args):
     """Export the model to an hdf5 file
     """
-    input_tensor, y_pred = build_model(None, args.num_channels)
+    input_tensor, y_pred = build_model(None, None, args.num_channels)
     model = Model(inputs=input_tensor, outputs=y_pred)
     model.save(args.m)
     print('model saved to {}'.format(args.m))
 
 
 def main():
-    ps = argparse.ArgumentParser()
-    ps.add_argument('-num_channels', type=int, help='number of channels of the image', default=3)
-    subparsers = ps.add_subparsers()
+    parser_train = argparse.ArgumentParser()
+    parser_train.add_argument('-num_channels', type=int, help='number of channels of the image', default=3)
+    # subparsers = ps.add_subparsers()
 
     # Parser for arguments to train the model
-    parser_train = subparsers.add_parser('train', help='train the model')
-    parser_train.add_argument('-ti', help='训练图片目录', default='')
-    parser_train.add_argument('-tl', help='训练标签文件', default='')
-    parser_train.add_argument('-vi', help='验证图片目录', default='')
-    parser_train.add_argument('-vl', help='验证标签文件', default='')
-    parser_train.add_argument('-b', type=int, help='batch size')
-    parser_train.add_argument('-img_size', type=int, nargs=2, help='训练图片宽和高', default=(164, 48))
-    parser_train.add_argument('-pre', help='pre trained weight file', default='')
-    parser_train.add_argument('-start_epoch', type=int, default=0)
-    parser_train.add_argument('-n', type=int, help='number of epochs', default=30)
-    parser_train.add_argument('-label_len', type=int, help='标签长度')
-    parser_train.add_argument('-c', help='checkpoints format string')
-    parser_train.add_argument('-log', help='tensorboard 日志目录, 默认为空', default='./logs')
-    parser_train.set_defaults(func=train)
-
+    # parser_train = subparsers.add_parser('train', help='train the model')
+    parser_train.add_argument('--ti', help='训练图片目录', default='/home/vip/qyr/data/ocr_data/train')
+    parser_train.add_argument('--tl', help='训练标签文件', default='/home/vip/qyr/data/ocr_data/train_labels.txt')
+    parser_train.add_argument('--vi', help='验证图片目录', default='/home/vip/qyr/data/ocr_data/val')
+    parser_train.add_argument('--vl', help='验证标签文件', default='/home/vip/qyr/data/ocr_data/val_labels.txt')
+    parser_train.add_argument('--b', type=int, help='batch size', default=16)
+    parser_train.add_argument('--img_size', type=int, nargs=2, help='训练图片宽和高', default=(164, 48))
+    parser_train.add_argument('--pre', help='pre trained weight file', default='')
+    parser_train.add_argument('--start_epoch', type=int, default=0)
+    parser_train.add_argument('--n', type=int, help='number of epochs', default=30)
+    parser_train.add_argument('--label_len', type=int, help='标签长度', default=7)
+    parser_train.add_argument('--ck', help='checkpoints format string', default='./models', type=str)
+    parser_train.add_argument('--log', help='tensorboard 日志目录, 默认为空', default='./logs')
+    # parser_train.set_defaults('-func', default=train)
+    #
     # Argument parser of arguments to export the model
-    parser_export = subparsers.add_parser('export', help='将模型导出为hdf5文件')
-    parser_export.add_argument('-m', help='导出文件名(.h5)', default='plate_rec.h5')
-    parser_export.set_defaults(func=export)
+    # parser_export = subparsers.add_parser('export', help='将模型导出为hdf5文件')
+    # parser_export.add_argument('-m', help='导出文件名(.h5)', default='plate_rec.h5')
+    # parser_export.set_defaults(func=export)
 
-    args = ps.parse_args()
-    args.func(args)
+    # args = ps.parse_args()
+    # args.func(args)
+    args = parser_train.parse_args()
+
+    train(args)
 
 
 if __name__ == '__main__':
