@@ -40,7 +40,7 @@ def ctc_lambda_func(args):
 
 def build_model(width, height, num_channels, n_class=NUM_CHARS + 1, ISTRAIN=True):
     rnn_size = 256
-    input_tensor = Input(name='xinput', shape=(width, height, num_channels), dtype='float32')
+    input_tensor = Input(name='the_input', shape=(width, height, num_channels), dtype='float32')
     # input_tensor = Input((164, 48, 3))
     x = input_tensor
     base_conv = 32
