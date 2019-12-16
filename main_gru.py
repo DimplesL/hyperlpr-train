@@ -213,7 +213,7 @@ class TextImageGenerator:
 
 
 def train(args):
-    ckpt_dir = os.path.dirname(args.ck)
+    ckpt_dir = args.ck
     if not os.path.isdir(ckpt_dir):
         os.makedirs(ckpt_dir)
 
