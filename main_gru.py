@@ -242,7 +242,7 @@ def train(args):
 
     # the loss calc occurs elsewhere, so use a dummy lambda func for the loss
     model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
-    model.load_weights('./model_h5/ocr_plate_all_gru.h5', by_name=True, skip_mismatch=True)
+    # model.load_weights('./model_h5/ocr_plate_all_gru.h5', by_name=True, skip_mismatch=True)
 
     train_gen = TextImageGenerator(img_dir=args.ti,
                                    label_file=args.tl,
