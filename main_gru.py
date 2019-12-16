@@ -66,27 +66,20 @@ def build_model(width, height, num_channels, n_class=NUM_CHARS + 1, ISTRAIN=True
     return input_tensor, x
 
 
-def encodeLabel(s):
+def encode_label(s):
     label = np.zeros([len(s)])
     for i, c in enumerate(s):
         label[i] = CHARS_DICT[c]
     return label
 
 
-def parseLine_gen(line):
-    label = encodeLabel(line.decode('utf-8').strip())
-    return label
-
-
 def parse_line(line):
+    parts = line.split(':')
+    filename = parts[0]
     try:
-        parts = line.split(':')
-        filename = parts[0]
-        label = encodeLabel(parts[1].decode('utf-8').strip())
+        label = encode_label(parts[1].strip().upper())
         return filename, label
     except Exception as e:
-        print(e)
-        print(line)
         return None, None
 
 
