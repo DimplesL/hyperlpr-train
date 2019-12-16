@@ -201,19 +201,22 @@ def train(args):
                                  num_channels=args.num_channels,
                                  label_len=label_len)
 
-    checkpoints_cb = ModelCheckpoint(args.c, period=1)
-    cbs = [checkpoints_cb]
+    # checkpoints_cb = ModelCheckpoint(args.c, period=1)
+    # cbs = [checkpoints_cb]
 
-    if args.log != '':
-        tfboard_cb = TensorBoard(log_dir=args.log, write_images=True)
-        cbs.append(tfboard_cb)
+    # if args.log != '':
+    #     tfboard_cb = TensorBoard(log_dir=args.log, write_images=True)
+    #     cbs.append(tfboard_cb)
+
+    filepath = ckpt_dir + '/model-ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5'
+    checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
     model.fit_generator(generator=train_gen.get_data(),
                         steps_per_epoch=(train_gen._num_examples + train_gen._batch_size - 1) // train_gen._batch_size,
                         epochs=args.n,
                         validation_data=val_gen.get_data(),
                         validation_steps=(val_gen._num_examples + val_gen._batch_size - 1) // val_gen._batch_size,
-                        callbacks=cbs,
+                        callbacks=[checkpoint],
                         initial_epoch=args.start_epoch)
 
 
@@ -249,7 +252,7 @@ def main():
     #
     # Argument parser of arguments to export the model
     # parser_export = subparsers.add_parser('export', help='将模型导出为hdf5文件')
-    # parser_export.add_argument('-m', help='导出文件名(.h5)', default='plate_rec.h5')
+    # parser_train.add_argument('-m', help='导出文件名(.h5)', default='plate_rec.h5')
     # parser_export.set_defaults(func=export)
 
     # args = ps.parse_args()
@@ -257,6 +260,8 @@ def main():
     args = parser_train.parse_args()
 
     train(args)
+
+    # export(args)
 
 
 if __name__ == '__main__':
