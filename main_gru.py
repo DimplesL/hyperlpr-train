@@ -156,10 +156,11 @@ class TextImageGenerator:
         with open(self._label_file) as f:
             for line in f:
                 filename, label = parse_line(line)
-                if len(label) != self._label_len:
-                    continue
                 if filename is None:
                     continue
+                if len(label) != self._label_len:
+                    continue
+
                 self.filenames.append(filename)
                 self.labels.append(label)
                 self._num_examples += 1
