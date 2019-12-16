@@ -220,11 +220,14 @@ def train(args):
     if args.log != '' and not os.path.isdir(args.log):
         os.makedirs(args.log)
     label_len = args.label_len
-    input_tensor, y_pre = build_model(args.img_size[0], args.img_size[1], args.num_channels)
-    labels = Input(name='xlabels', shape=[label_len], dtype='float32')
+
+    input_tensor, y_pred = build_model(args.img_size[0], args.img_size[1], args.num_channels)
+
+    labels = Input(name='the_labels', shape=[label_len], dtype='float32')
     input_length = Input(name='input_length', shape=[1], dtype='int32')
     label_length = Input(name='label_length', shape=[1], dtype='int32')
-    pred_length = int(y_pre.shape[1]) - indexstart
+
+    pred_length = int(y_pred.shape[1])
     # Keras doesn't currently support loss funcs with extra parameters
     # so CTC loss is implemented in a lambda layer
     loss_out = Lambda(ctc_lambda_func, output_shape=(1,), name='ctc')([y_pre, labels, input_length, label_length])
