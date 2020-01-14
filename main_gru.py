@@ -34,7 +34,7 @@ indexstart = 0
 def ctc_lambda_func(args):
     y_pred, labels, input_length, label_length = args
     # y_pred = y_pred[:, :, 0, :]
-    y_pred = y_pred[:, indexstart:, :]
+    y_pred = y_pred[:, 0:, :]
     return K.ctc_batch_cost(labels, y_pred, input_length, label_length)
 
 

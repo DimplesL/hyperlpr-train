@@ -1,11 +1,6 @@
-注意
-====
-由于本人不再从事相关工作，所以这个脚本我不再维护。提的 Issue 我也不再处理。
 
 Hyperlpr端到端车牌识别训练脚本
-=====
 
-该脚本用于训练[HyperLPR](https://github.com/zeusees/HyperLPR)的端到端识别模型。
 
 依赖
 -----

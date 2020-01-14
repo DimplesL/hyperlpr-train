@@ -1,3 +1,4 @@
+# encoding: utf-8
 import os
 import argparse
 
@@ -21,7 +22,7 @@ CHARS = ['京', '沪', '津', '渝', '冀', '晋', '蒙', '辽', '吉', '黑',
          '沈', '兰', '成', '济', '海', '民', '航', '空',
          ]
 
-CHARS_DICT = {char: i for i, char in enumerate(CHARS)}
+CHARS_DICT = {char.decode('utf-8'): i for i, char in enumerate(CHARS)}
 
 NUM_CHARS = len(CHARS)
 
@@ -226,7 +227,7 @@ def export(args):
     """
     input_tensor, y_pred = build_model(None, None, args.num_channels)
     model = Model(inputs=input_tensor, outputs=y_pred)
-    model.save(args.m)
+    model.save('./plate_rec.h5')
     print('model saved to {}'.format(args.m))
 
 
@@ -249,7 +250,9 @@ def main():
 
     args = parser_train.parse_args()
 
-    train(args)
+    # train(args)
+
+    # export(args)
 
 
 if __name__ == '__main__':
